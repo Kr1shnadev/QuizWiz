@@ -323,7 +323,8 @@
             alert('Blueprint saved successfully!');
             
             // Reset form
-            document.getElementById('blueprintForm').reset();
+             document.getElementById('blueprintForm').reset();
+document.getElementById('examName').value = 'Internal Exam';
             document.getElementById('examName').value = 'Internal Exam';
             const sectionElements = document.querySelectorAll('.section-item');
             for (let i = 1; i < sections.length; i++) {

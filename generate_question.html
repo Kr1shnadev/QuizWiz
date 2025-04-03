@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QuizWiz - Generate Question Paper</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="questionPaperGenerator.js"></script>
     <style>
         * {
             margin: 0;
@@ -76,207 +78,123 @@
             margin-bottom: 30px;
         }
 
-        .generate-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
-
-        .upload-area {
-            background: white;
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .drop-zone {
-            border: 2px dashed #1a237e;
-            border-radius: 8px;
-            padding: 40px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: border-color 0.3s ease;
-        }
-
-        .drop-zone:hover {
-            border-color: #303f9f;
-        }
-
-        .drop-zone i {
-            font-size: 48px;
-            color: #1a237e;
-            margin-bottom: 15px;
-        }
-
-        .file-list {
-            margin-top: 20px;
-        }
-
-        .file-item {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            background: #f5f5f5;
-            border-radius: 5px;
-            margin-bottom: 8px;
-        }
-
-        .file-item i {
-            margin-right: 10px;
-            color: #1a237e;
-        }
-
-        .file-item .remove-file {
-            margin-left: auto;
-            color: #f44336;
-            cursor: pointer;
-        }
-
-        .settings-area {
-            background: white;
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-
-        .generate-btn {
-            background: #1a237e;
+        .import-blueprint {
+            background-color: #4CAF50;
             color: white;
-            border: none;
             padding: 12px 24px;
+            border: none;
             border-radius: 5px;
-            cursor: pointer;
             font-size: 16px;
-            transition: background-color 0.3s;
-        }
-
-        .generate-btn:hover {
-            background: #303f9f;
-        }
-
-        .settings-header {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 20px;
-        }
-
-        .import-btn {
+            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 8px;
-            background: #4caf50;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
             transition: background-color 0.3s;
         }
 
-        .import-btn:hover {
-            background: #388e3c;
+        .import-blueprint:hover {
+            background-color: #388E3C;
         }
 
-        .modal {
+        .sections-container {
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
+            gap: 20px;
+            flex-direction: column;
         }
 
-        .modal-content {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        .section {
             background: white;
-            padding: 30px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #666;
-        }
-
-        .blueprint-list {
-            display: grid;
-            gap: 15px;
-        }
-
-        .blueprint-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            background: #f5f5f5;
+            padding: 20px;
             border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .section-header {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1a237e;
+        }
+
+        .question-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .option-input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .marks-input {
+            width: 100px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .generate-paper-btn {
+            background-color: #1a237e;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 20px auto;
             transition: background-color 0.3s;
         }
 
-        .blueprint-item:hover {
-            background: #e0e0e0;
+        .generate-paper-btn:hover {
+            background-color: #303f9f;
         }
 
-        .blueprint-info {
-            flex: 1;
+        .format-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
         }
 
-        .blueprint-name {
-            font-weight: 500;
-            margin-bottom: 5px;
-        }
-
-        .blueprint-details {
+        .format-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
             font-size: 14px;
-            color: #666;
+            transition: background-color 0.3s;
+        }
+
+        .format-btn.docx {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .format-btn.pdf {
+            background-color: #f44336;
+            color: white;
         }
     </style>
 </head>
 <body>
     <div class="sidebar">
         <div class="logo">
-            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2L1 21h22L12 2zm0 3.83L19.13 19H4.87L12 5.83z'/%3E%3C/svg%3E" alt="Logo">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2L1 21h22L12 2zm0 3.83L9.13 19H4.87L12 5.83z'/%3E%3C/svg%3E" alt="Logo">
             <h1>QuizWiz</h1>
         </div>
         <nav>
@@ -318,200 +236,308 @@
                 <i class="material-icons">account_circle</i>
             </div>
         </div>
-
-        <div class="generate-section">
-            <div class="upload-area">
-                <h3>Upload PDF Resources</h3>
-                <div class="drop-zone" id="dropZone">
-                    <i class="material-icons">cloud_upload</i>
-                    <p>Drag & drop PDF files here or click to browse</p>
-                    <input type="file" id="fileInput" accept=".pdf" multiple style="display: none">
-                </div>
-                <div class="file-list" id="fileList">
-                    <!-- File items will be added here dynamically -->
-                </div>
-            </div>
-            <div class="settings-area">
-                <h3>Generation Settings</h3>
-                <div class="settings-header">
-                    <button type="button" id="importBlueprint" class="import-btn">
-                        <i class="material-icons">file_upload</i>
-                        Import Blueprint
-                    </button>
-                </div>
-                <form id="questionForm">
-                    <div class="form-group">
-                        <label for="subject">Subject</label>
-                        <input type="text" id="subject" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="topic">Topic</label>
-                        <input type="text" id="topic" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="difficulty">Difficulty Level</label>
-                        <select id="difficulty" required>
-                            <option value="easy">Easy</option>
-                            <option value="medium">Medium</option>
-                            <option value="hard">Hard</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="questionCount">Number of Questions</label>
-                        <input type="number" id="questionCount" min="1" max="50" required>
-                    </div>
-                    <button type="submit" class="generate-btn">Generate Question Paper</button>
-                </form>
-            </div>
+        <button class="import-blueprint" onclick="importBlueprint()">
+            <i class="material-icons">upload_file</i>
+            Import Blueprint
+        </button>
+        <div id="sections-container" class="sections-container">
+            <!-- Sections will be dynamically added here -->
         </div>
     </div>
-
-    <!-- Blueprint Import Modal -->
-    <div id="blueprintModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Select Blueprint</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="blueprint-list" id="blueprintList">
-                <!-- Blueprint items will be added here dynamically -->
-            </div>
-        </div>
-    </div>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="questionPaperGenerator.js"></script>
     <script>
-        // File upload handling
-        const dropZone = document.getElementById('dropZone');
-        const fileInput = document.getElementById('fileInput');
-        const fileList = document.getElementById('fileList');
+        function importBlueprint() {
+            const savedBlueprints = JSON.parse(localStorage.getItem('blueprints')) || [];
+            if (savedBlueprints.length === 0) {
+                alert('No saved blueprints found. Please create a blueprint first.');
+                return;
+            }
 
-        dropZone.addEventListener('click', () => fileInput.click());
-
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.style.borderColor = '#303f9f';
-        });
-
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.style.borderColor = '#1a237e';
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.style.borderColor = '#1a237e';
-            const files = e.dataTransfer.files;
-            handleFiles(files);
-        });
-
-        fileInput.addEventListener('change', () => {
-            handleFiles(fileInput.files);
-        });
-
-        function handleFiles(files) {
-            Array.from(files).forEach(file => {
-                if (file.type === 'application/pdf') {
-                    addFileToList(file);
-                }
-            });
-        }
-
-        function addFileToList(file) {
-            const fileItem = document.createElement('div');
-            fileItem.className = 'file-item';
-            fileItem.innerHTML = `
-                <i class="material-icons">description</i>
-                <span>${file.name}</span>
-                <i class="material-icons remove-file">close</i>
+            // Create a dialog for blueprint selection
+            const dialog = document.createElement('div');
+            dialog.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 1000; max-width: 500px; width: 90%;';
+            
+            dialog.innerHTML = `
+                <h3 style="margin-bottom: 15px; color: #1a237e;">Select Blueprint</h3>
+                <div style="max-height: 300px; overflow-y: auto;">
+                    ${savedBlueprints.map((bp, index) => `
+                        <div class="blueprint-option" style="padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;">
+                            ${bp.examName} - ${bp.sections.length} sections
+                        </div>
+                    `).join('')}
+                </div>
+                <button onclick="closeDialog()" style="margin-top: 15px; padding: 8px 16px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer;">Cancel</button>
             `;
 
-            fileItem.querySelector('.remove-file').addEventListener('click', () => {
-                fileItem.remove();
+            // Add overlay
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999;';
+            
+            document.body.appendChild(overlay);
+            document.body.appendChild(dialog);
+
+            // Add click event listeners to blueprint options
+            dialog.querySelectorAll('.blueprint-option').forEach((option, index) => {
+                option.addEventListener('click', () => {
+                    const selectedBlueprint = savedBlueprints[index];
+                    generateQuestions(selectedBlueprint);
+                    closeDialog();
+                });
             });
 
-            fileList.appendChild(fileItem);
+            // Function to close dialog
+            window.closeDialog = function() {
+                document.body.removeChild(dialog);
+                document.body.removeChild(overlay);
+            };
         }
 
-        // Form handling
-        document.getElementById('questionForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        function addQuestion(button, type, defaultMarks) {
+            const sectionElement = button.parentElement;
+            const questionContainers = sectionElement.querySelectorAll('.question-container');
+            const newIndex = questionContainers.length + 1;
             
-            const subject = document.getElementById('subject').value;
-            const topic = document.getElementById('topic').value;
-            const difficulty = document.getElementById('difficulty').value;
-            const questionCount = document.getElementById('questionCount').value;
-
-            // For now, we'll just log the form data
-            console.log({
-                subject,
-                topic,
-                difficulty,
-                questionCount,
-                files: Array.from(document.querySelectorAll('.file-item')).map(item => 
-                    item.querySelector('span').textContent
-                )
-            });
-        });
-
-        // Blueprint import handling
-        const importBtn = document.getElementById('importBlueprint');
-        const modal = document.getElementById('blueprintModal');
-        const closeModal = document.querySelector('.close-modal');
-        const blueprintList = document.getElementById('blueprintList');
-
-        // Open modal
-        importBtn.addEventListener('click', () => {
-            modal.style.display = 'block';
-            loadBlueprints();
-        });
-
-        // Close modal
-        closeModal.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-
-        // Close modal when clicking outside
-        window.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
-
-        function loadBlueprints() {
-            // Fetch saved blueprints from localStorage
-            const savedBlueprints = JSON.parse(localStorage.getItem('blueprints')) || [];
-            blueprintList.innerHTML = '';
-
-            savedBlueprints.forEach(blueprint => {
-                const blueprintItem = document.createElement('div');
-                blueprintItem.className = 'blueprint-item';
-                blueprintItem.innerHTML = `
-                    <div class="blueprint-info">
-                        <div class="blueprint-name">${blueprint.examName}</div>
-                        <div class="blueprint-details">
-                            Total Marks: ${blueprint.totalMarks} | Duration: ${blueprint.duration} minutes
+            let newQuestionHTML = '';
+            if (type === 'mcq') {
+                newQuestionHTML = `
+                    <div class="question-container">
+                        <textarea class="question-input" placeholder="Enter question ${newIndex}"></textarea>
+                        <div class="options-container">
+                            <input type="text" class="option-input" placeholder="Option A">
+                            <input type="text" class="option-input" placeholder="Option B">
+                            <input type="text" class="option-input" placeholder="Option C">
+                            <input type="text" class="option-input" placeholder="Option D">
                         </div>
+                        <input type="number" class="marks-input" value="${defaultMarks}">
                     </div>
                 `;
+            } else if (type === 'truefalse') {
+                newQuestionHTML = `
+                    <div class="question-container">
+                        <textarea class="question-input" placeholder="Enter True/False question ${newIndex}"></textarea>
+                        <div class="options-container">
+                            <input type="text" class="option-input" value="True" readonly>
+                            <input type="text" class="option-input" value="False" readonly>
+                        </div>
+                        <input type="number" class="marks-input" value="${defaultMarks}">
+                    </div>
+                `;
+            } else {
+                newQuestionHTML = `
+                    <div class="question-container">
+                        <textarea class="question-input" placeholder="Enter descriptive question ${newIndex}"></textarea>
+                        <input type="number" class="marks-input" value="${defaultMarks}">
+                    </div>
+                `;
+            }
+            
+            // Insert the new question before the Add Question button
+            button.insertAdjacentHTML('beforebegin', newQuestionHTML);
+        }
 
-                blueprintItem.addEventListener('click', () => {
-                    importBlueprint(blueprint);
-                    modal.style.display = 'none';
+        function generateQuestions(blueprint) {
+            const container = document.getElementById('sections-container');
+            container.style.display = 'flex';
+            container.innerHTML = '';
+            
+            blueprint.sections.forEach(section => {
+                const sectionElement = document.createElement('div');
+                sectionElement.className = 'section';
+                
+                let sectionHTML = `
+                    <div class="section-header">${section.name} (${section.type})</div>
+                `;
+                
+                for(let i = 1; i <= section.count; i++) {
+                    if (section.type === 'mcq') {
+                        sectionHTML += `
+                            <div class="question-container">
+                                <textarea class="question-input" placeholder="Enter question ${i}"></textarea>
+                                <div class="options-container">
+                                    <input type="text" class="option-input" placeholder="Option A">
+                                    <input type="text" class="option-input" placeholder="Option B">
+                                    <input type="text" class="option-input" placeholder="Option C">
+                                    <input type="text" class="option-input" placeholder="Option D">
+                                </div>
+                                <input type="number" class="marks-input" value="${section.marksPerQuestion}">
+                            </div>
+                        `;
+                    } else if (section.type === 'truefalse') {
+                        sectionHTML += `
+                            <div class="question-container">
+                                <textarea class="question-input" placeholder="Enter True/False question ${i}"></textarea>
+                                <div class="options-container">
+                                    <input type="text" class="option-input" value="True" readonly>
+                                    <input type="text" class="option-input" value="False" readonly>
+                                </div>
+                                <input type="number" class="marks-input" value="${section.marksPerQuestion}">
+                            </div>
+                        `;
+                    } else {
+                        sectionHTML += `
+                            <div class="question-container">
+                                <textarea class="question-input" placeholder="Enter descriptive question ${i}"></textarea>
+                                <input type="number" class="marks-input" value="${section.marksPerQuestion}">
+                            </div>
+                        `;
+                    }
+                }
+                
+                // Add button to add more questions
+                sectionHTML += `
+                    <button class="add-question-btn" style="background: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 4px; margin-top: 10px; cursor: pointer;" 
+                            onclick="addQuestion(this, '${section.type}', ${section.marksPerQuestion})">
+                        <i class="material-icons" style="vertical-align: middle; margin-right: 5px;">add</i>
+                        Add Question
+                    </button>
+                `;
+                sectionElement.innerHTML = sectionHTML;
+                
+                // Add event listeners to all input fields
+                sectionElement.querySelectorAll('textarea, input').forEach(input => {
+                    input.addEventListener('click', function(e) {
+                        e.target.focus();
+                    });
+                    
+                    input.addEventListener('focus', function(e) {
+                        e.target.style.borderColor = '#1a237e';
+                    });
+                    
+                    input.addEventListener('blur', function(e) {
+                        e.target.style.borderColor = '#ddd';
+                    });
                 });
-
-                blueprintList.appendChild(blueprintItem);
+                
+                // Section element is complete
+                container.appendChild(sectionElement);
             });
 
-            if (savedBlueprints.length === 0) {
-                blueprintList.innerHTML = '<p>No saved blueprints found.</p>';
-            }
+            // Add Generate Question Paper button
+            const generatePaperBtn = document.createElement('button');
+            generatePaperBtn.className = 'generate-paper-btn';
+            generatePaperBtn.innerHTML = `
+                <i class="material-icons">description</i>
+                Generate Question Paper
+            `;
+            generatePaperBtn.onclick = () => showFormatOptions();
+            container.appendChild(generatePaperBtn);
+
+            // Add format options container
+            const formatOptions = document.createElement('div');
+            formatOptions.className = 'format-options';
+            formatOptions.style.display = 'none';
+            formatOptions.innerHTML = `
+                <button class="format-btn docx" onclick="generateQuestionPaper('docx')">Download DOCX</button>
+                <button class="format-btn pdf" onclick="generateQuestionPaper('pdf')">Download PDF</button>
+            `;
+            container.appendChild(formatOptions);
         }
 
-        function importBlueprint(blueprint) {
-            // Populate form fields with blueprint data
-            document.getElementById('subject').value = blueprint.examName;
-            document.getElementById('questionCount').value = blueprint.sections.reduce((total, section) => 
-                total + parseInt(section.count), 0);
+        function showFormatOptions() {
+            const filename = prompt('Enter filename for the question paper:', 'question_paper');
+            if (!filename) return;
+            
+            const formatOptions = document.querySelector('.format-options');
+            formatOptions.setAttribute('data-filename', filename);
+            formatOptions.style.display = 'flex';
         }
+
+        function generateQuestionPaper(format) {
+            const sectionElements = document.querySelectorAll('.section');
+            const blueprint = JSON.parse(localStorage.getItem('blueprints'))[0]; //TODO: Handle case where blueprint is not selected or found
+            const formatOptions = document.querySelector('.format-options');
+            const filename = formatOptions.getAttribute('data-filename') || 'question_paper'; // Use default if attribute not set
+
+            // examTitle is removed as it's handled by the generator backend or not needed for frontend file naming logic
+
+            const sections = Array.from(sectionElements).map(section => {
+                const questions = Array.from(section.querySelectorAll('.question-container')).map(question => {
+                    const questionText = question.querySelector('.question-input').value;
+                    const marks = parseInt(question.querySelector('.marks-input').value);
+                    const options = Array.from(question.querySelectorAll('.option-input')).map(option => option.value);
+                    
+                    return {
+                        text: questionText,
+                        marks: marks,
+                        options: options.length > 0 ? options : undefined
+                    };
+                });
+
+                return {
+                    sectionName: section.querySelector('.section-header').textContent,
+                    questions: questions
+                };
+            });
+
+            if (format === 'docx') {
+                window.QuestionPaperGenerator.generateDOCX(sections, blueprint, filename);
+            } else if (format === 'pdf') {
+                window.QuestionPaperGenerator.generatePDF(sections, blueprint, filename);
+            }
+        }
+                // title.textContent = blueprint.examName; // Title might be set within generatePDF or might use a
+                content.appendChild(title);
+
+                sections.forEach((section, sectionIndex) => {
+                    const sectionHeader = document.createElement('h2');
+                    sectionHeader.textContent = section.querySelector('.section-header').textContent;
+                    sectionHeader.style.cssText = `
+                        margin-top: 30px;
+                        margin-bottom: 20px;
+                        font-size: 18px;
+                        font-weight: bold;
+                        border-bottom: 2px solid #1a237e;
+                        padding-bottom: 8px;
+                    `;
+                    content.appendChild(sectionHeader);
+
+                    const questions = section.querySelectorAll('.question-container');
+                    questions.forEach((question, questionIndex) => {
+                        const questionText = question.querySelector('.question-input').value;
+                        const marks = question.querySelector('.marks-input').value;
+                        const options = question.querySelectorAll('.option-input');
+
+                        const questionElement = document.createElement('div');
+                        questionElement.style.cssText = `
+                            margin-bottom: 20px;
+                            padding-left: 20px;
+                        `;
+                        questionElement.innerHTML = `<p style="margin-bottom: 10px;"><strong>Q${questionIndex + 1}.</strong> ${questionText} <span style="color: #666;">[${marks} marks]</span></p>`;
+
+                        if (options.length > 0) {
+                            const optionsList = document.createElement('div');
+                            optionsList.style.cssText = `
+                                margin-left: 20px;
+                                margin-top: 10px;
+                            `;
+                            options.forEach((option, optionIndex) => {
+                                optionsList.innerHTML += `<p style="margin-bottom: 8px; color: #333;"><strong>${String.fromCharCode(65 + optionIndex)}.</strong> ${option.value}</p>`;
+                            });
+                            questionElement.appendChild(optionsList);
+                        }
+
+                        content.appendChild(questionElement);
+                    });
+                });
+
+                const opt = {
+                    margin: [0.5, 0.5],
+                    filename: `${blueprint.examName.replace(/\s+/g, '_')}_question_paper.pdf`,
+                    image: { type: 'jpeg', quality: 1 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+                    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                };
+
+                html2pdf().set(opt).from(content).save().then(() => {
+                    document.body.removeChild(content);
+                });
+            
+        
     </script>
 </body>
 </html>
+
+
