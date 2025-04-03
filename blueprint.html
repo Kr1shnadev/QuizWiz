@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuizWiz - Blueprint</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #1a237e;
+            color: white;
+            padding: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 30px;
+        }
+
+        .logo img {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-left: 4px solid white;
+        }
+
+        .nav-item i {
+            margin-right: 10px;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 30px;
+            background-color: #f5f5f5;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .blueprint-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .settings-area {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .section-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .generate-btn {
+            background: #1a237e;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+
+        .generate-btn:hover {
+            background: #303f9f;
+        }
+
+        .remove-section {
+            color: #f44336;
+            cursor: pointer;
+            float: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2L1 21h22L12 2zm0 3.83L19.13 19H4.87L12 5.83z'/%3E%3C/svg%3E" alt="Logo">
+            <h1>QuizWiz</h1>
+        </div>
+        <nav>
+            <a href="faculty_home.html" class="nav-item">
+                <i class="material-icons">home</i>
+                Home
+            </a>
+            <a href="generate_question.html" class="nav-item">
+                <i class="material-icons">description</i>
+                Generate Question Paper
+            </a>
+            <a href="assets.html" class="nav-item">
+                <i class="material-icons">folder</i>
+                Assets
+            </a>
+            <a href="resources.html" class="nav-item">
+                <i class="material-icons">school</i>
+                Teacher Resources
+            </a>
+            <a href="marks.html" class="nav-item">
+                <i class="material-icons">assessment</i>
+                Exam Marks
+            </a>
+            <a href="remarks.html" class="nav-item">
+                <i class="material-icons">comment</i>
+                Remarks
+            </a>
+            <a href="blueprint.html" class="nav-item active">
+                <i class="material-icons">architecture</i>
+                Blueprint
+            </a>
+        </nav>
+    </div>
+    <div class="main-content">
+        <div class="header">
+            <h2>Question Paper Blueprint</h2>
+            <div class="user-actions">
+                <i class="material-icons">notifications</i>
+                <i class="material-icons">account_circle</i>
+            </div>
+        </div>
+
+        <div class="blueprint-section">
+            <div class="settings-area">
+                <h3>Question Paper Structure</h3>
+                <form id="blueprintForm">
+                    <div class="form-group">
+                        <label for="examName">Exam Name</label>
+                        <input type="text" id="examName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="totalMarks">Total Marks</label>
+                        <input type="number" id="totalMarks" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="duration">Duration (minutes)</label>
+                        <input type="number" id="duration" min="1" required>
+                    </div>
+                </form>
+            </div>
+            <div class="settings-area">
+                <h3>Section Distribution</h3>
+                <form id="sectionForm">
+                    <div id="sections">
+                        <div class="section-item">
+                            <i class="material-icons remove-section">delete</i>
+                            <div class="form-group">
+                                <label>Section Name</label>
+                                <input type="text" class="section-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Question Type</label>
+                                <select class="question-type" required>
+                                    <option value="mcq">Multiple Choice</option>
+                                    <option value="short">Short Answer</option>
+                                    <option value="long">Long Answer</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Number of Questions</label>
+                                <input type="number" class="question-count" min="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Marks per Question</label>
+                                <input type="number" class="marks-per-question" min="1" required>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="generate-btn" id="addSection">Add Section</button>
+                    <button type="submit" class="generate-btn">Save Blueprint</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Section handling
+        document.getElementById('addSection').addEventListener('click', function() {
+            const sectionTemplate = document.querySelector('.section-item').cloneNode(true);
+            // Clear input values
+            sectionTemplate.querySelectorAll('input').forEach(input => input.value = '');
+            // Reset select
+            sectionTemplate.querySelector('select').selectedIndex = 0;
+            document.getElementById('sections').appendChild(sectionTemplate);
+
+            // Add remove functionality to new section
+            sectionTemplate.querySelector('.remove-section').addEventListener('click', function() {
+                if (document.querySelectorAll('.section-item').length > 1) {
+                    this.parentElement.remove();
+                }
+            });
+        });
+
+        // Add remove functionality to initial section
+        document.querySelector('.remove-section').addEventListener('click', function() {
+            if (document.querySelectorAll('.section-item').length > 1) {
+                this.parentElement.remove();
+            }
+        });
+
+        // Form submission
+        document.getElementById('sectionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const sections = [];
+            document.querySelectorAll('.section-item').forEach(section => {
+                sections.push({
+                    name: section.querySelector('.section-name').value,
+                    type: section.querySelector('.question-type').value,
+                    count: section.querySelector('.question-count').value,
+                    marksPerQuestion: section.querySelector('.marks-per-question').value
+                });
+            });
+
+            const blueprint = {
+                examName: document.getElementById('examName').value,
+                totalMarks: document.getElementById('totalMarks').value,
+                duration: document.getElementById('duration').value,
+                sections: sections
+            };
+
+            console.log('Blueprint:', blueprint);
+            // Here you would typically send this data to your backend
+        });
+    </script>
+</body>
+</html>

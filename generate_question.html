@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuizWiz - Faculty Portal</title>
+    <title>QuizWiz - Generate Question Paper</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
         * {
@@ -58,6 +58,7 @@
             background-color: rgba(255, 255, 255, 0.2);
             border-left: 4px solid white;
         }
+
         .nav-item i {
             margin-right: 10px;
         }
@@ -75,46 +76,7 @@
             margin-bottom: 30px;
         }
 
-        .quick-links {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.3s;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .card i {
-            font-size: 40px;
-            color: #1a237e;
-            margin-bottom: 10px;
-        }
-
-        .card h3 {
-            color: #333;
-            margin-bottom: 5px;
-            font-size: 16px;
-        }
-
-        /* Question Paper Generation Styles */
         .generate-section {
-            display: none;
-            padding: 20px;
-        }
-
-        .generate-section.active {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 30px;
@@ -220,50 +182,45 @@
             <h1>QuizWiz</h1>
         </div>
         <nav>
-            <a href="#" class="nav-item active" data-section="home">
+            <a href="faculty_home.html" class="nav-item">
                 <i class="material-icons">home</i>
                 Home
             </a>
-            <a href="#" class="nav-item" data-section="generate">
+            <a href="generate_question.html" class="nav-item active">
                 <i class="material-icons">description</i>
                 Generate Question Paper
             </a>
-            <a href="#" class="nav-item" data-section="assets">
+            <a href="assets.html" class="nav-item">
                 <i class="material-icons">folder</i>
                 Assets
             </a>
-            <a href="#" class="nav-item" data-section="resources">
+            <a href="resources.html" class="nav-item">
                 <i class="material-icons">school</i>
                 Teacher Resources
             </a>
-            <a href="#" class="nav-item" data-section="marks">
+            <a href="marks.html" class="nav-item">
                 <i class="material-icons">assessment</i>
                 Exam Marks
             </a>
-            <a href="#" class="nav-item" data-section="remarks">
+            <a href="remarks.html" class="nav-item">
                 <i class="material-icons">comment</i>
                 Remarks
+            </a>
+            <a href="blueprint.html" class="nav-item">
+                <i class="material-icons">architecture</i>
+                Blueprint
             </a>
         </nav>
     </div>
     <div class="main-content">
         <div class="header">
-            <h2>Welcome, Teacher!</h2>
+            <h2>Generate Question Paper</h2>
             <div class="user-actions">
                 <i class="material-icons">notifications</i>
                 <i class="material-icons">account_circle</i>
             </div>
         </div>
 
-        <!-- Home Section -->
-        <div class="home-section active">
-            <h3>Quick Links</h3>
-            <div class="quick-links">
-                <!-- Existing quick links cards -->
-            </div>
-        </div>
-
-        <!-- Generate Question Paper Section -->
         <div class="generate-section">
             <div class="upload-area">
                 <h3>Upload PDF Resources</h3>
@@ -306,30 +263,6 @@
     </div>
 
     <script>
-        // Navigation handling
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                // Remove active class from all nav items and sections
-                document.querySelectorAll('.nav-item').forEach(navItem => {
-                    navItem.classList.remove('active');
-                });
-                document.querySelector('.home-section').classList.remove('active');
-                document.querySelector('.generate-section').classList.remove('active');
-
-                // Add active class to clicked item
-                this.classList.add('active');
-
-                // Show corresponding section
-                const section = this.getAttribute('data-section');
-                if (section === 'home') {
-                    document.querySelector('.home-section').classList.add('active');
-                } else if (section === 'generate') {
-                    document.querySelector('.generate-section').classList.add('active');
-                }
-            });
-        });
-
         // File upload handling
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
@@ -404,17 +337,3 @@
     </script>
 </body>
 </html>
-<script>
-    // Handle navigation item clicks
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', function(e) {
-            e.preventDefault();
-            // Remove active class from all nav items
-            document.querySelectorAll('.nav-item').forEach(navItem => {
-                navItem.classList.remove('active');
-            });
-            // Add active class to clicked item
-            this.classList.add('active');
-        });
-    });
-</script>
