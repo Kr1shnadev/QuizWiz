@@ -173,6 +173,104 @@
         .generate-btn:hover {
             background: #303f9f;
         }
+
+        .settings-header {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .import-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .import-btn:hover {
+            background: #388e3c;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .blueprint-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .blueprint-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .blueprint-item:hover {
+            background: #e0e0e0;
+        }
+
+        .blueprint-info {
+            flex: 1;
+        }
+
+        .blueprint-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .blueprint-details {
+            font-size: 14px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -235,6 +333,12 @@
             </div>
             <div class="settings-area">
                 <h3>Generation Settings</h3>
+                <div class="settings-header">
+                    <button type="button" id="importBlueprint" class="import-btn">
+                        <i class="material-icons">file_upload</i>
+                        Import Blueprint
+                    </button>
+                </div>
                 <form id="questionForm">
                     <div class="form-group">
                         <label for="subject">Subject</label>
@@ -258,6 +362,19 @@
                     </div>
                     <button type="submit" class="generate-btn">Generate Question Paper</button>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blueprint Import Modal -->
+    <div id="blueprintModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Select Blueprint</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="blueprint-list" id="blueprintList">
+                <!-- Blueprint items will be added here dynamically -->
             </div>
         </div>
     </div>
@@ -334,6 +451,67 @@
                 )
             });
         });
+
+        // Blueprint import handling
+        const importBtn = document.getElementById('importBlueprint');
+        const modal = document.getElementById('blueprintModal');
+        const closeModal = document.querySelector('.close-modal');
+        const blueprintList = document.getElementById('blueprintList');
+
+        // Open modal
+        importBtn.addEventListener('click', () => {
+            modal.style.display = 'block';
+            loadBlueprints();
+        });
+
+        // Close modal
+        closeModal.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        function loadBlueprints() {
+            // Fetch saved blueprints from localStorage
+            const savedBlueprints = JSON.parse(localStorage.getItem('blueprints')) || [];
+            blueprintList.innerHTML = '';
+
+            savedBlueprints.forEach(blueprint => {
+                const blueprintItem = document.createElement('div');
+                blueprintItem.className = 'blueprint-item';
+                blueprintItem.innerHTML = `
+                    <div class="blueprint-info">
+                        <div class="blueprint-name">${blueprint.examName}</div>
+                        <div class="blueprint-details">
+                            Total Marks: ${blueprint.totalMarks} | Duration: ${blueprint.duration} minutes
+                        </div>
+                    </div>
+                `;
+
+                blueprintItem.addEventListener('click', () => {
+                    importBlueprint(blueprint);
+                    modal.style.display = 'none';
+                });
+
+                blueprintList.appendChild(blueprintItem);
+            });
+
+            if (savedBlueprints.length === 0) {
+                blueprintList.innerHTML = '<p>No saved blueprints found.</p>';
+            }
+        }
+
+        function importBlueprint(blueprint) {
+            // Populate form fields with blueprint data
+            document.getElementById('subject').value = blueprint.examName;
+            document.getElementById('questionCount').value = blueprint.sections.reduce((total, section) => 
+                total + parseInt(section.count), 0);
+        }
     </script>
 </body>
 </html>
