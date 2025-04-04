@@ -6,6 +6,7 @@
     <title>QuizWiz - Generate Question Paper</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="questionPaperGenerator.js"></script>
     <style>
         * {
@@ -231,11 +232,21 @@
     <div class="main-content">
         <div class="header">
             <h2>Generate Question Paper</h2>
+            <input type="text" id="exam-title" placeholder="Enter Exam Title" style="padding: 8px; border-radius: 4px; border: 1px solid #ddd; margin-left: 10px;">
             <div class="user-actions">
                 <i class="material-icons">notifications</i>
                 <i class="material-icons">account_circle</i>
             </div>
         </div>
+        
+        // Add exam title input field
+        <div style="text-align: center; margin-bottom: 20px;">
+            <input type="text" id="exam-title" placeholder="Enter Exam Title" style="font-size: 24px; font-family: 'Segoe UI', Arial, sans-serif; width: 80%; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+        </div>
+        
+        // Display exam duration and total marks
+        <div id="exam-info" style="text-align: center; font-size: 18px; margin-bottom: 20px; color: #1a237e;"></div>
+        
         <button class="import-blueprint" onclick="importBlueprint()">
             <i class="material-icons">upload_file</i>
             Import Blueprint
@@ -246,6 +257,9 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/7.8.2/docx.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script type="module">
+    import { jsPDF } from 'jspdf';
+</script>
     <script src="questionPaperGenerator.js"></script>
     <script>
         function importBlueprint() {
@@ -342,6 +356,10 @@
             container.style.display = 'flex';
             container.innerHTML = '';
             
+            // Set exam details
+            const examInfo = document.getElementById('exam-info');
+            examInfo.innerHTML = `Duration: ${blueprint.duration} | Total Marks: ${blueprint.totalMarks}`;
+
             blueprint.sections.forEach(section => {
                 const sectionElement = document.createElement('div');
                 sectionElement.className = 'section';
@@ -445,38 +463,190 @@
         }
 
         function generateQuestionPaper(format) {
-            const sectionElements = document.querySelectorAll('.section');
-            const blueprint = JSON.parse(localStorage.getItem('blueprints'))[0]; //TODO: Handle case where blueprint is not selected or found
-            const formatOptions = document.querySelector('.format-options');
-            const filename = formatOptions.getAttribute('data-filename') || 'question_paper'; // Use default if attribute not set
+    const sectionElements = document.querySelectorAll('.section');
+    const blueprint = JSON.parse(localStorage.getItem('blueprints'))[0];
+    const formatOptions = document.querySelector('.format-options');
+    const filename = formatOptions.getAttribute('data-filename') || 'question_paper';
 
-            // examTitle is removed as it's handled by the generator backend or not needed for frontend file naming logic
+    const examTitle = document.getElementById('exam-title').value;
+    const examInfo = `Duration: ${blueprint.duration} | Total Marks: ${blueprint.totalMarks}`;
 
-            const sections = Array.from(sectionElements).map(section => {
-                const questions = Array.from(section.querySelectorAll('.question-container')).map(question => {
-                    const questionText = question.querySelector('.question-input').value;
-                    const marks = parseInt(question.querySelector('.marks-input').value);
-                    const options = Array.from(question.querySelectorAll('.option-input')).map(option => option.value);
-                    
-                    return {
-                        text: questionText,
-                        marks: marks,
-                        options: options.length > 0 ? options : undefined
-                    };
-                });
-
-                return {
-                    sectionName: section.querySelector('.section-header').textContent,
-                    questions: questions
-                };
-            });
-
-            if (format === 'docx') {
-                window.QuestionPaperGenerator.generateDOCX(sections, blueprint, filename);
-            } else if (format === 'pdf') {
-                window.QuestionPaperGenerator.generatePDF(sections, blueprint, filename);
-            }
+    // Initialize PDF document
+    const doc = new window.jspdf.jsPDF();
+    let currentY = 20; // Starting Y position with more space at top
+    const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 20;
+    const lineHeight = 10;
+    let questionNumber = 1;
+    
+    // Function to check if we need a new page and handle page break
+    function checkNewPage(height) {
+        if (currentY + height > pageHeight - margin) {
+            doc.addPage();
+            currentY = margin;
+            return true;
         }
+        return false;
+    }
+
+    // Function to add text with proper line breaks and page management
+    function addWrappedText(text, x, fontSize, isHeader = false) {
+        const maxWidth = pageWidth - (margin * 2);
+        doc.setFontSize(fontSize);
+        const lines = doc.splitTextToSize(text, maxWidth);
+        const textHeight = lines.length * lineHeight + (isHeader ? lineHeight : 0);
+        
+        if (checkNewPage(textHeight)) {
+            currentY = margin;
+        }
+        
+        doc.text(lines, x, currentY);
+        currentY += textHeight;
+    }
+
+    // Function to check if we need a new page
+    function checkNewPage(height) {
+        if (currentY + height > pageHeight - margin) {
+            doc.addPage();
+            currentY = margin;
+            return true;
+        }
+        return false;
+    }
+
+    // Function to add text with proper line breaks
+    function addWrappedText(text, x, fontSize) {
+        const maxWidth = pageWidth - (margin * 2);
+        doc.setFontSize(fontSize);
+        const lines = doc.splitTextToSize(text, maxWidth);
+        
+        // Check if we need a new page for this text block
+        if (checkNewPage(lines.length * lineHeight)) {
+            currentY = margin;
+        }
+        
+        doc.text(lines, x, currentY);
+        currentY += lines.length * lineHeight;
+        return lines.length * lineHeight;
+    }
+
+    // Initialize document settings
+    doc.setFont('helvetica', 'bold');
+    
+    // Add exam title
+    addWrappedText(examTitle, pageWidth / 2, 20, true);
+    currentY += lineHeight;
+    
+    // Add exam details
+    doc.setFont('helvetica', 'normal');
+    const headerDetails = `Duration: ${blueprint.duration} | Total Marks: ${blueprint.totalMarks}`;
+    addWrappedText(headerDetails, margin, 12);
+    currentY += lineHeight;
+    
+    // Process each section
+    sectionElements.forEach((sectionElement, sectionIndex) => {
+        const sectionTitle = sectionElement.querySelector('.section-header').textContent;
+        
+        // Add section title
+        doc.setFont('helvetica', 'bold');
+        addWrappedText(sectionTitle, margin, 14, true);
+        currentY += lineHeight;
+        
+        // Process questions in this section
+        const questions = sectionElement.querySelectorAll('.question-container');
+        questions.forEach((question, questionIndex) => {
+            doc.setFont('helvetica', 'normal');
+            
+            // Add question text
+            const questionText = question.querySelector('.question-input').value;
+            const questionMarks = question.querySelector('.marks-input').value;
+            const fullQuestionText = `Q${questionNumber}. ${questionText} [${questionMarks} marks]`;
+            
+            addWrappedText(fullQuestionText, margin, 12);
+            currentY += lineHeight;
+            
+            // Add options if present
+            const options = question.querySelectorAll('.option-input');
+            if (options.length > 0) {
+                options.forEach((option, optionIndex) => {
+                    const optionText = `${String.fromCharCode(65 + optionIndex)}) ${option.value}`;
+                    addWrappedText(optionText, margin + 20, 12);
+                    currentY += lineHeight / 2;
+                });
+                currentY += lineHeight / 2;
+            }
+            
+            questionNumber++;
+            currentY += lineHeight;
+        });
+        
+        // Add extra space between sections
+        currentY += lineHeight * 2;
+    });
+
+    // Save the PDF
+    doc.save(`${filename}.pdf`);
+    formatOptions.style.display = 'none';
+    alert('PDF generated successfully!');
+
+    // Collect sections data from DOM
+    const sections = Array.from(sectionElements).map(sectionElement => {
+        const sectionName = sectionElement.querySelector('.section-header').textContent;
+        const questions = Array.from(sectionElement.querySelectorAll('.question-container')).map(questionContainer => {
+            const questionText = questionContainer.querySelector('.question-input').value;
+            const marks = parseInt(questionContainer.querySelector('.marks-input').value) || 0;
+            const optionsInputs = questionContainer.querySelectorAll('.option-input');
+            
+            let options = [];
+            if (optionsInputs.length > 0) {
+                options = Array.from(optionsInputs).map(input => input.value).filter(value => value.trim() !== '');
+            }
+
+            return {
+                text: questionText,
+                marks: marks,
+                options: options.length > 0 ? options : null
+            };
+        });
+
+        return {
+            sectionName: sectionName,
+            questions: questions
+        };
+    });
+
+    // Add sections and questions to the PDF
+    let yPosition = 50;
+    sections.forEach(section => {
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text(section.sectionName, 10, yPosition);
+        yPosition += 10;
+
+        section.questions.forEach(question => {
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Q: ${question.text}`, 10, yPosition);
+            yPosition += 10;
+
+            if (question.options) {
+                question.options.forEach((option, index) => {
+                    doc.text(`${String.fromCharCode(65 + index)}: ${option}`, 20, yPosition);
+                    yPosition += 10;
+                });
+            }
+
+            doc.text(`Marks: ${question.marks}`, 10, yPosition);
+            yPosition += 10;
+        });
+
+        yPosition += 10;
+    });
+
+    // Save the PDF
+    doc.save(`${filename}.pdf`);
+}
                 // title.textContent = blueprint.examName; // Title might be set within generatePDF or might use a
                 content.appendChild(title);
 
