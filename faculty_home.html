@@ -148,6 +148,66 @@
             opacity: 0.9;
             line-height: 1.6;
         }
+
+        .saved-papers {
+            margin-bottom: 30px;
+        }
+
+        .saved-papers h2 {
+            color: #1a237e;
+            margin-bottom: 20px;
+        }
+
+        .papers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .paper-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .paper-card h3 {
+            color: #1a237e;
+            margin-bottom: 10px;
+        }
+
+        .paper-card p {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .paper-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .paper-actions button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .paper-actions .edit-btn {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .paper-actions .delete-btn {
+            background-color: #f44336;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -161,7 +221,7 @@
                 <i class="material-icons">home</i>
                 Home
             </a>
-            <a href="generate_question.html" class="nav-item">
+            <a href="generate_question1.html" class="nav-item">
                 <i class="material-icons">description</i>
                 Generate Question Paper
             </a>
@@ -200,6 +260,11 @@
         <div class="welcome-section">
             <h1>Welcome back, Professor!</h1>
             <p>Access all your teaching resources and manage your exams efficiently with QuizWiz.</p>
+        </div>
+
+        <div class="saved-papers">
+            <h2>Saved Question Papers</h2>
+            <div id="saved-papers-list" class="papers-grid"></div>
         </div>
 
         <div class="quick-links">
@@ -256,5 +321,59 @@
             </a>
         </div>
     </div>
+    <script>
+        // Load and display saved question papers
+        function loadSavedPapers() {
+            const savedPapers = JSON.parse(localStorage.getItem('savedQuestionPapers') || '[]');
+            const papersList = document.getElementById('saved-papers-list');
+            
+            if (savedPapers.length === 0) {
+                papersList.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666;">No saved question papers yet.</p>';
+                return;
+            }
+            
+            papersList.innerHTML = savedPapers.map((paper, index) => `
+                <div class="paper-card">
+                    <h3>${paper.title}</h3>
+                    <p>Created: ${new Date(paper.timestamp).toLocaleDateString()}</p>
+                    <p>Sections: ${paper.sections.length}</p>
+                    <div class="paper-actions">
+                        <button class="edit-btn" onclick="editPaper(${index})">
+                            <i class="material-icons">edit</i>
+                            Edit
+                        </button>
+                        <button class="delete-btn" onclick="deletePaper(${index})">
+                            <i class="material-icons">delete</i>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function editPaper(index) {
+            const savedPapers = JSON.parse(localStorage.getItem('savedQuestionPapers') || '[]');
+            const paperToEdit = savedPapers[index];
+            
+            // Store the paper to edit in localStorage
+            localStorage.setItem('currentEditPaper', JSON.stringify(paperToEdit));
+            
+            // Navigate to generate question page
+            window.location.href = 'generate_question1.html';
+        }
+
+        function deletePaper(index) {
+            if (!confirm('Are you sure you want to delete this question paper?')) return;
+            
+            const savedPapers = JSON.parse(localStorage.getItem('savedQuestionPapers') || '[]');
+            savedPapers.splice(index, 1);
+            localStorage.setItem('savedQuestionPapers', JSON.stringify(savedPapers));
+            
+            loadSavedPapers();
+        }
+
+        // Load saved papers when the page loads
+        window.onload = loadSavedPapers;
+    </script>
 </body>
 </html>

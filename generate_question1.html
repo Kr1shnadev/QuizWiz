@@ -262,6 +262,95 @@
 </script>
     <script src="questionPaperGenerator.js"></script>
     <script>
+        window.onload = function() {
+            // Check if we're editing an existing paper
+            const editPaper = localStorage.getItem('currentEditPaper');
+            if (editPaper) {
+                const paper = JSON.parse(editPaper);
+                document.getElementById('exam-title').value = paper.title;
+                loadSavedPaper(paper);
+                localStorage.removeItem('currentEditPaper');
+            }
+        }
+
+        function loadSavedPaper(paper) {
+            const container = document.getElementById('sections-container');
+            container.style.display = 'flex';
+            container.innerHTML = '';
+            
+            paper.sections.forEach(section => {
+                const sectionElement = document.createElement('div');
+                sectionElement.className = 'section';
+                
+                let sectionHTML = `
+                    <div class="section-header">${section.name}</div>
+                `;
+                
+                section.questions.forEach((question, index) => {
+                    if (question.options) {
+                        sectionHTML += `
+                            <div class="question-container">
+                                <textarea class="question-input">${question.question}</textarea>
+                                <div class="options-container">
+                                    ${question.options.map((option, i) => `
+                                        <input type="text" class="option-input" value="${option}">
+                                    `).join('')}
+                                </div>
+                                <input type="number" class="marks-input" value="${question.marks}">
+                            </div>
+                        `;
+                    } else {
+                        sectionHTML += `
+                            <div class="question-container">
+                                <textarea class="question-input">${question.question}</textarea>
+                                <input type="number" class="marks-input" value="${question.marks}">
+                            </div>
+                        `;
+                    }
+                });
+                
+                sectionElement.innerHTML = sectionHTML;
+                container.appendChild(sectionElement);
+            });
+            
+            // Add buttons
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.display = 'flex';
+            buttonContainer.style.gap = '10px';
+            buttonContainer.style.justifyContent = 'center';
+            
+            const saveButton = document.createElement('button');
+            saveButton.className = 'generate-paper-btn';
+            saveButton.style.backgroundColor = '#4CAF50';
+            saveButton.innerHTML = `
+                <i class="material-icons">save</i>
+                Save Question Paper
+            `;
+            saveButton.onclick = () => saveQuestionPaper();
+            
+            const generatePaperBtn = document.createElement('button');
+            generatePaperBtn.className = 'generate-paper-btn';
+            generatePaperBtn.innerHTML = `
+                <i class="material-icons">description</i>
+                Generate Question Paper
+            `;
+            generatePaperBtn.onclick = () => showFormatOptions();
+            
+            buttonContainer.appendChild(saveButton);
+            buttonContainer.appendChild(generatePaperBtn);
+            container.appendChild(buttonContainer);
+            
+            // Add format options container
+            const formatOptions = document.createElement('div');
+            formatOptions.className = 'format-options';
+            formatOptions.style.display = 'none';
+            formatOptions.innerHTML = `
+                <button class="format-btn docx" onclick="generateQuestionPaper('docx')">Download DOCX</button>
+                <button class="format-btn pdf" onclick="generateQuestionPaper('pdf')">Download PDF</button>
+            `;
+            container.appendChild(formatOptions);
+        }
+
         function importBlueprint() {
             const savedBlueprints = JSON.parse(localStorage.getItem('blueprints')) || [];
             if (savedBlueprints.length === 0) {
@@ -432,7 +521,21 @@
                 container.appendChild(sectionElement);
             });
 
-            // Add Generate Question Paper button
+            // Add Save and Generate Question Paper buttons
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.display = 'flex';
+            buttonContainer.style.gap = '10px';
+            buttonContainer.style.justifyContent = 'center';
+            
+            const saveButton = document.createElement('button');
+            saveButton.className = 'generate-paper-btn';
+            saveButton.style.backgroundColor = '#4CAF50';
+            saveButton.innerHTML = `
+                <i class="material-icons">save</i>
+                Save Question Paper
+            `;
+            saveButton.onclick = () => saveQuestionPaper();
+            
             const generatePaperBtn = document.createElement('button');
             generatePaperBtn.className = 'generate-paper-btn';
             generatePaperBtn.innerHTML = `
@@ -440,7 +543,10 @@
                 Generate Question Paper
             `;
             generatePaperBtn.onclick = () => showFormatOptions();
-            container.appendChild(generatePaperBtn);
+            
+            buttonContainer.appendChild(saveButton);
+            buttonContainer.appendChild(generatePaperBtn);
+            container.appendChild(buttonContainer);
 
             // Add format options container
             const formatOptions = document.createElement('div');
@@ -462,22 +568,68 @@
             formatOptions.style.display = 'flex';
         }
 
-        function generateQuestionPaper(format) {
+        function saveQuestionPaper() {
+    const examTitle = document.getElementById('exam-title').value;
+    if (!examTitle) {
+        alert('Please enter an exam title before saving');
+        return;
+    }
+
+    const questionPaper = {
+        title: examTitle,
+        sections: [],
+        timestamp: new Date().toISOString()
+    };
+
+    // Get all sections
+    document.querySelectorAll('.section').forEach(section => {
+        const sectionData = {
+            name: section.querySelector('.section-header').textContent,
+            questions: []
+        };
+
+        // Get all questions in this section
+        section.querySelectorAll('.question-container').forEach(questionContainer => {
+            const questionData = {
+                question: questionContainer.querySelector('.question-input').value,
+                marks: questionContainer.querySelector('.marks-input').value
+            };
+
+            // Get options if they exist
+            const options = questionContainer.querySelectorAll('.option-input');
+            if (options.length > 0) {
+                questionData.options = Array.from(options).map(option => option.value);
+            }
+
+            sectionData.questions.push(questionData);
+        });
+
+        questionPaper.sections.push(sectionData);
+    });
+
+    // Save to localStorage
+    const savedPapers = JSON.parse(localStorage.getItem('savedQuestionPapers') || '[]');
+    savedPapers.push(questionPaper);
+    localStorage.setItem('savedQuestionPapers', JSON.stringify(savedPapers));
+
+    alert('Question paper saved successfully!');
+}
+
+function generateQuestionPaper(format) {
     const sectionElements = document.querySelectorAll('.section');
     const blueprint = JSON.parse(localStorage.getItem('blueprints'))[0];
     const formatOptions = document.querySelector('.format-options');
     const filename = formatOptions.getAttribute('data-filename') || 'question_paper';
 
     const examTitle = document.getElementById('exam-title').value;
-    const examInfo = `Duration: ${blueprint.duration} | Total Marks: ${blueprint.totalMarks}`;
 
     // Initialize PDF document
     const doc = new window.jspdf.jsPDF();
-    let currentY = 20; // Starting Y position with more space at top
+    let currentY = 30; // Increased initial spacing
     const pageWidth = doc.internal.pageSize.width;
     const pageHeight = doc.internal.pageSize.height;
     const margin = 20;
-    const lineHeight = 10;
+    const lineHeight = 7; // Reduced line height for better spacing
     let questionNumber = 1;
     
     // Function to check if we need a new page and handle page break
@@ -492,60 +644,31 @@
 
     // Function to add text with proper line breaks and page management
     function addWrappedText(text, x, fontSize, isHeader = false) {
-        const maxWidth = pageWidth - (margin * 2);
         doc.setFontSize(fontSize);
+        const maxWidth = pageWidth - (2 * margin);
         const lines = doc.splitTextToSize(text, maxWidth);
-        const textHeight = lines.length * lineHeight + (isHeader ? lineHeight : 0);
+        const textHeight = (lines.length * lineHeight) + (isHeader ? lineHeight : 0);
         
-        if (checkNewPage(textHeight)) {
-            currentY = margin;
-        }
-        
+        checkNewPage(textHeight);
         doc.text(lines, x, currentY);
         currentY += textHeight;
     }
 
-    // Function to check if we need a new page
-    function checkNewPage(height) {
-        if (currentY + height > pageHeight - margin) {
-            doc.addPage();
-            currentY = margin;
-            return true;
-        }
-        return false;
-    }
-
-    // Function to add text with proper line breaks
-    function addWrappedText(text, x, fontSize) {
-        const maxWidth = pageWidth - (margin * 2);
-        doc.setFontSize(fontSize);
-        const lines = doc.splitTextToSize(text, maxWidth);
-        
-        // Check if we need a new page for this text block
-        if (checkNewPage(lines.length * lineHeight)) {
-            currentY = margin;
-        }
-        
-        doc.text(lines, x, currentY);
-        currentY += lines.length * lineHeight;
-        return lines.length * lineHeight;
-    }
-
-    // Initialize document settings
+    // Add exam title centered at the top
     doc.setFont('helvetica', 'bold');
-    
-    // Add exam title
-    addWrappedText(examTitle, pageWidth / 2, 20, true);
-    currentY += lineHeight;
+    doc.setFontSize(16);
+    doc.text(examTitle, pageWidth / 2, currentY, { align: 'center' });
+    currentY += lineHeight * 2;
     
     // Add exam details
     doc.setFont('helvetica', 'normal');
+    doc.setFontSize(12);
     const headerDetails = `Duration: ${blueprint.duration} | Total Marks: ${blueprint.totalMarks}`;
-    addWrappedText(headerDetails, margin, 12);
-    currentY += lineHeight;
+    doc.text(headerDetails, pageWidth / 2, currentY, { align: 'center' });
+    currentY += lineHeight * 2;
     
     // Process each section
-    sectionElements.forEach((sectionElement, sectionIndex) => {
+    sectionElements.forEach((sectionElement) => {
         const sectionTitle = sectionElement.querySelector('.section-header').textContent;
         
         // Add section title
@@ -555,30 +678,29 @@
         
         // Process questions in this section
         const questions = sectionElement.querySelectorAll('.question-container');
-        questions.forEach((question, questionIndex) => {
+        questions.forEach((question) => {
             doc.setFont('helvetica', 'normal');
             
-            // Add question text
+            // Get question text and marks
             const questionText = question.querySelector('.question-input').value;
             const questionMarks = question.querySelector('.marks-input').value;
             const fullQuestionText = `Q${questionNumber}. ${questionText} [${questionMarks} marks]`;
             
+            // Add question with proper spacing
             addWrappedText(fullQuestionText, margin, 12);
-            currentY += lineHeight;
             
             // Add options if present
             const options = question.querySelectorAll('.option-input');
             if (options.length > 0) {
+                currentY += lineHeight;
                 options.forEach((option, optionIndex) => {
                     const optionText = `${String.fromCharCode(65 + optionIndex)}) ${option.value}`;
-                    addWrappedText(optionText, margin + 20, 12);
-                    currentY += lineHeight / 2;
+                    addWrappedText(optionText, margin + 10, 11);
                 });
-                currentY += lineHeight / 2;
             }
             
             questionNumber++;
-            currentY += lineHeight;
+            currentY += lineHeight * 1.5; // Add space between questions
         });
         
         // Add extra space between sections
@@ -588,64 +710,6 @@
     // Save the PDF
     doc.save(`${filename}.pdf`);
     formatOptions.style.display = 'none';
-    alert('PDF generated successfully!');
-
-    // Collect sections data from DOM
-    const sections = Array.from(sectionElements).map(sectionElement => {
-        const sectionName = sectionElement.querySelector('.section-header').textContent;
-        const questions = Array.from(sectionElement.querySelectorAll('.question-container')).map(questionContainer => {
-            const questionText = questionContainer.querySelector('.question-input').value;
-            const marks = parseInt(questionContainer.querySelector('.marks-input').value) || 0;
-            const optionsInputs = questionContainer.querySelectorAll('.option-input');
-            
-            let options = [];
-            if (optionsInputs.length > 0) {
-                options = Array.from(optionsInputs).map(input => input.value).filter(value => value.trim() !== '');
-            }
-
-            return {
-                text: questionText,
-                marks: marks,
-                options: options.length > 0 ? options : null
-            };
-        });
-
-        return {
-            sectionName: sectionName,
-            questions: questions
-        };
-    });
-
-    // Add sections and questions to the PDF
-    let yPosition = 50;
-    sections.forEach(section => {
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.text(section.sectionName, 10, yPosition);
-        yPosition += 10;
-
-        section.questions.forEach(question => {
-            doc.setFontSize(12);
-            doc.setFont('helvetica', 'normal');
-            doc.text(`Q: ${question.text}`, 10, yPosition);
-            yPosition += 10;
-
-            if (question.options) {
-                question.options.forEach((option, index) => {
-                    doc.text(`${String.fromCharCode(65 + index)}: ${option}`, 20, yPosition);
-                    yPosition += 10;
-                });
-            }
-
-            doc.text(`Marks: ${question.marks}`, 10, yPosition);
-            yPosition += 10;
-        });
-
-        yPosition += 10;
-    });
-
-    // Save the PDF
-    doc.save(`${filename}.pdf`);
 }
                 // title.textContent = blueprint.examName; // Title might be set within generatePDF or might use a
                 content.appendChild(title);
