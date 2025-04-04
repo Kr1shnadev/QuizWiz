@@ -211,14 +211,14 @@
                             <i class="material-icons remove-section">delete</i>
                             <div class="form-group">
                                 <label>Section Name</label>
-                                <input type="text" class="section-name" required>
+                                <input type="text" class="section-name" placeholder="e.g. Section A" required>
                             </div>
                             <div class="form-group">
                                 <label>Question Type</label>
                                 <select class="question-type" required>
                                     <option value="mcq">Multiple Choice</option>
-                                    <option value="short">Short Answer</option>
-                                    <option value="long">Long Answer</option>
+                                    <option value="truefalse">True/False</option>
+                                    <option value="descriptive">Descriptive Questions</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -241,17 +241,47 @@
     <script>
         // Section handling
         document.getElementById('addSection').addEventListener('click', function() {
-            const sectionTemplate = document.querySelector('.section-item').cloneNode(true);
-            // Clear input values
-            sectionTemplate.querySelectorAll('input').forEach(input => input.value = '');
-            // Reset select
-            sectionTemplate.querySelector('select').selectedIndex = 0;
+            const sectionTemplate = document.createElement('div');
+            sectionTemplate.className = 'section-item';
+            sectionTemplate.innerHTML = `
+                <i class="material-icons remove-section">delete</i>
+                <div class="form-group">
+                    <label>Section Name</label>
+                    <input type="text" class="section-name" placeholder="e.g. Section A" required>
+                </div>
+                <div class="form-group">
+                    <label>Question Type</label>
+                    <select class="question-type" required>
+                        <option value="mcq">Multiple Choice</option>
+                        <option value="truefalse">True/False</option>
+                        <option value="descriptive">Descriptive Questions</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Number of Questions</label>
+                    <input type="number" class="question-count" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Marks per Question</label>
+                    <input type="number" class="marks-per-question" min="1" required>
+                </div>
+            `;
             document.getElementById('sections').appendChild(sectionTemplate);
 
             // Add remove functionality to new section
             sectionTemplate.querySelector('.remove-section').addEventListener('click', function() {
                 if (document.querySelectorAll('.section-item').length > 1) {
                     this.parentElement.remove();
+                }
+            });
+
+            // Add question type change handler
+            sectionTemplate.querySelector('.question-type').addEventListener('change', function() {
+                const questionCount = sectionTemplate.querySelector('.question-count');
+                const marksPerQuestion = sectionTemplate.querySelector('.marks-per-question');
+                if (this.value === 'mcq') {
+                    questionCount.value = '';
+                    marksPerQuestion.value = '';
                 }
             });
         });
@@ -284,7 +314,24 @@
             };
 
             console.log('Blueprint:', blueprint);
-            // Here you would typically send this data to your backend
+            // Save blueprint to localStorage
+            const savedBlueprints = JSON.parse(localStorage.getItem('blueprints')) || [];
+            savedBlueprints.push(blueprint);
+            localStorage.setItem('blueprints', JSON.stringify(savedBlueprints));
+
+            // Show success message
+            alert('Blueprint saved successfully!');
+            
+            // Reset form
+             document.getElementById('blueprintForm').reset();
+document.getElementById('examName').value = 'Internal Exam';
+            document.getElementById('examName').value = 'Internal Exam';
+            const sectionElements = document.querySelectorAll('.section-item');
+            for (let i = 1; i < sections.length; i++) {
+                sections[i].remove();
+            }
+            sections[0].querySelectorAll('input').forEach(input => input.value = '');
+            sections[0].querySelector('select').selectedIndex = 0;
         });
     </script>
 </body>
